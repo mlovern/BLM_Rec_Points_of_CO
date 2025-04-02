@@ -1,0 +1,161 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BLM Recreation Points of Colorado</title>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.5.7/css/pico.min.css">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet" />
+    
+    <style>
+        #map-container {
+            width: 100%;
+            height: 500px;
+            position: relative;
+        }
+        .map {
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+        .active {
+            display: block;
+        }
+        nav button {
+            margin-right: 10px;
+        }
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background-color: #fff;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            z-index: 1;
+        }
+        .legend span {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-right: 5px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>BLM Recreation Points of Colorado</h2>
+        <nav>
+            <button onclick="showMap('map1')">All Points</button>
+            <button onclick="showMap('map2')">Overnight Sites</button>
+            <button onclick="showMap('map3')">Day Use Activity Areas</button>
+        </nav>
+        <div id="map-container">
+            <div id="map1" class="map active"></div>
+            <div id="map2" class="map"></div>
+            <div id="map3" class="map"></div>
+            <div id="legend" class="legend"></div>
+        </div>
+    </div>
+
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWFlcmxvdmVybiIsImEiOiJjbTd3NnhxY24wMmp4MmxvaGNheGMzcHJwIn0.ZiWXM5n2BI3ZZY25ULAprA';
+
+        const map1 = new mapboxgl.Map({
+            container: 'map1',
+            style: 'mapbox://styles/maerlovern/cm8x7np7d000201t1f55welle',
+            center: [-107.427903, 38.797671],
+            zoom: 5.9
+        });
+
+        const map2 = new mapboxgl.Map({
+            container: 'map2',
+            style: 'mapbox://styles/maerlovern/cm8de3cm300rm01socxha0qgo',
+            center: [-107.427903, 38.797671],
+            zoom: 5.9
+        });
+
+        const map3 = new mapboxgl.Map({
+            container: 'map3',
+            style: 'mapbox://styles/maerlovern/cm8xc8yvz000901r16y9p2wej',
+            center: [-107.427903, 38.797671],
+            zoom: 5.9
+        });
+
+        const legendData = {
+            map1: [
+                { color: '#fa4747', label: 'Cabin (Reservable w/ Fee)' },
+		{ color: '#db4d06', label: 'Primitive Campsite (Fee Only)' },
+		{ color: '#f68041', label: 'Developed Campsite (First Come First Serve)' },
+		{ color: '#c8db70', label: 'Point of Interest' },
+		{ color: '#1dcd4f', label: 'Scenic Overlook' },
+		{ color: '#6f9906', label: 'Campground' },
+		{ color: '#247a4c', label: 'Developed Campsite (Fee Only)' },
+		{ color: '#4d7551', label: 'Interpretive Site' },
+		{ color: '#04b98f', label: 'Primitive Campsite (Reservable w/ Fee)' },
+		{ color: '#088ca0', label: 'Primitive Campsite (First Come First Serve' },
+		{ color: '#baf4fc', label: 'Picnic Area' },
+		{ color: '#0564bd', label: 'Underdeveloped Campsite' },
+		{ color: '#8c65f6', label: 'Developed Campsite (Reservable w/ Fee)' },
+		{ color: '#f87298', label: 'Boat Launch' },
+		{ color: '#d4087f', label: 'Trail Head' },
+		{ color: '#88064e', label: 'Visitor Center' }
+            ],
+            map2: [
+                { color: '#fa4747', label: 'Cabin (Reservable w/ Fee)' },
+		{ color: '#db4d06', label: 'Primitive Campsite (Fee Only)' },
+		{ color: '#f68041', label: 'Developed Campsite (First Come First Serve)' },
+		{ color: '#6f9906', label: 'Campground' },
+		{ color: '#247a4c', label: 'Developed Campsite (Fee Only)' },
+		{ color: '#04b98f', label: 'Primitive Campsite (Reservable w/ Fee)' },
+		{ color: '#088ca0', label: 'Primitive Campsite (First Come First Serve' },
+		{ color: '#0564bd', label: 'Underdeveloped Campsite' },
+		{ color: '#8c65f6', label: 'Developed Campsite (Reservable w/ Fee)' }
+            ],
+            map3: [
+                { color: '#c8db70', label: 'Point of Interest' },
+		{ color: '#1dcd4f', label: 'Scenic Overlook' },
+		{ color: '#4d7551', label: 'Interpretive Site' },
+		{ color: '#baf4fc', label: 'Picnic Area' },
+		{ color: '#f87298', label: 'Boat Launch' },
+		{ color: '#d4087f', label: 'Trail Head' },
+                { color: '#88064e', label: 'Visitor Center' }
+            ]
+        };
+
+        function updateLegend(mapId) {
+            const legend = document.getElementById('legend');
+            legend.innerHTML = '';
+
+            const data = legendData[mapId];
+
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.innerHTML = `<span style="background-color: ${item.color};"></span> ${item.label}`;
+                legend.appendChild(div);
+            });
+        }
+
+        function showMap(mapId) {
+            document.querySelectorAll('.map').forEach(map => {
+                map.classList.remove('active');
+            });
+            document.getElementById(mapId).classList.add('active');
+
+            if (mapId === 'map1') {
+                map1.resize();
+            } else if (mapId === 'map2') {
+                map2.resize();
+            } else if (mapId === 'map3') {
+                map3.resize();
+            }
+
+            updateLegend(mapId);
+        }
+
+        updateLegend('map1');
+    </script>
+</body>
+</html>
